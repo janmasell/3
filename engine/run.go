@@ -27,6 +27,7 @@ var (
 	FixDt                   float64                      // fixed time step?
 	stepper                 Stepper                      // generic step, can be EulerStep, HeunStep, etc
 	solvertype              int
+	stencillevel          	int							 // accuracy of stencils used during the simulation
 )
 
 func init() {
@@ -34,6 +35,7 @@ func init() {
 	DeclFunc("Steps", Steps, "Run the simulation for a number of time steps")
 	DeclFunc("RunWhile", RunWhile, "Run while condition function is true")
 	DeclFunc("SetSolver", SetSolver, "Set solver type.<br>1: Euler<br>2: Heun<br>3: Bogacki-Shampine<br>4: Runge-Kutta (RK4)<br>5: Dormand-Prince<br>6: Fehlberg<br>-1: Backward Euler")
+	DeclFunc("SetStencil", SetStencil, "Specify the convergence level of the stencil used:  <br>2: (default) O(a^2) <br>4: O(a^4)")
 	DeclFunc("ClearPostSteps", func() { postStep = nil }, "Clear the postStep array, which contains functions that are executed after each solver step. This includes running averages, centering routines to track skyrmions and domain walls etc.")
 	DeclTVar("t", &Time, "Total simulated time (s)")
 	DeclVar("step", &NSteps, "Total number of time steps taken")
@@ -44,6 +46,7 @@ func init() {
 	DeclVar("FixDt", &FixDt, "Set a fixed time step, 0 disables fixed step (which is the default)")
 	DeclFunc("Exit", Exit, "Exit from the program")
 	SetSolver(DORMANDPRINCE)
+	SetStencil(0)
 	_ = NewScalarValue("dt", "s", "Time Step", func() float64 { return Dt_si })
 	_ = NewScalarValue("LastErr", "", "Error of last step", func() float64 { return LastErr })
 	_ = NewScalarValue("PeakErr", "", "Overall maxium error per step", func() float64 { return PeakErr })
@@ -91,6 +94,29 @@ func SetSolver(typ int) {
 		stepper = new(RK56)
 	}
 	solvertype = typ
+}
+
+func SetStencil(level int) {
+	switch level {
+	default:
+		util.Fatalf("SetStencil: Convergence level not implemented: %v", level)
+	case 0:
+		// this is the default. Name chosen to not intervene with the proper level 2.
+		stencillevel = level
+	case 2:
+		// this is actually NOT the default. MuMax3 up to version 3.11 had a bug in the boundaries with DMI. 
+		stencillevel = level
+		util.Log("!!! ATTENTION !!!")
+		util.Log("Using higher order stencils is still on an experimental level. Proceed with caution. Not all features may be available.")
+	case 4:
+		stencillevel = level
+		util.Log("!!! ATTENTION !!!")
+		util.Log("Using higher order stencils is still on an experimental level. Proceed with caution. Not all features may be available.")
+	case 6:
+		stencillevel = level
+		util.Log("!!! ATTENTION !!!")
+		util.Log("Using higher order stencils is still on an experimental level. Proceed with caution. Not all features may be available.")
+	}
 }
 
 // write torque to dst and increment NEvals

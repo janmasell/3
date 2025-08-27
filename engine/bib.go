@@ -231,4 +231,11 @@ func buildLibrary() {
     url     = {https://link.aps.org/doi/10.1103/PhysRevB.111.134408},
 }`}
 
+	library["Masell2025"] = &bibEntry{
+		reason:   "Used higher order stencils",
+		shortref: "Higher order stencils: Unpublished yet. Contact Jan Masell if you find any bugs or problems.",
+		bibtex: `
+@article{Masell2025,
+}`}
+
 }

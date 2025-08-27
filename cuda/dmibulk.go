@@ -25,3 +25,42 @@ func AddDMIBulk(Beff *data.Slice, m *data.Slice, Aex, D SymmLUT, Msat MSlice, re
 		unsafe.Pointer(Aex), unsafe.Pointer(D), regions.Ptr,
 		float32(cellsize[X]), float32(cellsize[Y]), float32(cellsize[Z]), N[X], N[Y], N[Z], mesh.PBC_code(), openBC, cfg)
 }
+
+func AddDMIBulk_O2(Beff *data.Slice, m *data.Slice, Aex, D SymmLUT, Msat MSlice, regions *Bytes, mesh *data.Mesh) {
+	cellsize := mesh.CellSize()
+	N := Beff.Size()
+	util.Argument(m.Size() == N)
+	cfg := make3DConf(N)
+
+	k_adddmibulko2_async(Beff.DevPtr(X), Beff.DevPtr(Y), Beff.DevPtr(Z),
+		m.DevPtr(X), m.DevPtr(Y), m.DevPtr(Z),
+		Msat.DevPtr(0), Msat.Mul(0),
+		unsafe.Pointer(Aex), unsafe.Pointer(D), regions.Ptr,
+		float32(cellsize[X]), float32(cellsize[Y]), float32(cellsize[Z]), N[X], N[Y], N[Z], mesh.PBC_code(), cfg)
+}
+
+func AddDMIBulk_O4(Beff *data.Slice, m *data.Slice, Aex, D SymmLUT, Msat MSlice, regions *Bytes, mesh *data.Mesh) {
+	cellsize := mesh.CellSize()
+	N := Beff.Size()
+	util.Argument(m.Size() == N)
+	cfg := make3DConf(N)
+
+	k_adddmibulko4_async(Beff.DevPtr(X), Beff.DevPtr(Y), Beff.DevPtr(Z),
+		m.DevPtr(X), m.DevPtr(Y), m.DevPtr(Z),
+		Msat.DevPtr(0), Msat.Mul(0),
+		unsafe.Pointer(Aex), unsafe.Pointer(D), regions.Ptr,
+		float32(cellsize[X]), float32(cellsize[Y]), float32(cellsize[Z]), N[X], N[Y], N[Z], mesh.PBC_code(), cfg)
+}
+
+func AddDMIBulk_O6(Beff *data.Slice, m *data.Slice, Aex, D SymmLUT, Msat MSlice, regions *Bytes, mesh *data.Mesh) {
+	cellsize := mesh.CellSize()
+	N := Beff.Size()
+	util.Argument(m.Size() == N)
+	cfg := make3DConf(N)
+
+	k_adddmibulko6_async(Beff.DevPtr(X), Beff.DevPtr(Y), Beff.DevPtr(Z),
+		m.DevPtr(X), m.DevPtr(Y), m.DevPtr(Z),
+		Msat.DevPtr(0), Msat.Mul(0),
+		unsafe.Pointer(Aex), unsafe.Pointer(D), regions.Ptr,
+		float32(cellsize[X]), float32(cellsize[Y]), float32(cellsize[Z]), N[X], N[Y], N[Z], mesh.PBC_code(), cfg)
+}

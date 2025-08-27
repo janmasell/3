@@ -52,17 +52,78 @@ func AddExchangeField(dst *data.Slice) {
 	bulk := !Dbulk.isZero()
 	ms := Msat.MSlice()
 	defer ms.Recycle()
+	
+	// first sort by stencillevel.
 	switch {
-	case !inter && !bulk:
-		cuda.AddExchange(dst, M.Buffer(), lex2.Gpu(), ms, regions.Gpu(), M.Mesh())
-	case inter && !bulk:
-		Refer("mulkers2017")
-		cuda.AddDMI(dst, M.Buffer(), lex2.Gpu(), din2.Gpu(), ms, regions.Gpu(), M.Mesh(), OpenBC) // dmi+exchange
-	case bulk && !inter:
-		cuda.AddDMIBulk(dst, M.Buffer(), lex2.Gpu(), dbulk2.Gpu(), ms, regions.Gpu(), M.Mesh(), OpenBC) // dmi+exchange
-		// TODO: add ScaleInterDbulk and InterDbulk
-	case inter && bulk:
-		util.Fatal("Cannot have interfacial-induced DMI and bulk DMI at the same time")
+	case stencillevel==6:
+		switch {
+		case OpenBC:
+			util.Fatal("Cannot have OpenBC with higher order stencils.")
+		case !inter && !bulk:
+			//Refer("Masell2025")
+			//cuda.AddExchange_O6(dst, M.Buffer(), lex2.Gpu(), ms, regions.Gpu(), M.Mesh())
+			util.Fatal("... programming cuda.AddExchange_O6 in progress ...")
+		case inter && !bulk:
+			//Refer("Masell2025")
+			//cuda.AddDMI_O6(dst, M.Buffer(), lex2.Gpu(), din2.Gpu(), ms, regions.Gpu(), M.Mesh()) // dmi+exchange
+			util.Fatal("... programming cuda.AddDMI_O6 in progress ...")
+		case bulk && !inter:
+			Refer("Masell2025")
+			cuda.AddDMIBulk_O6(dst, M.Buffer(), lex2.Gpu(), dbulk2.Gpu(), ms, regions.Gpu(), M.Mesh()) // dmi+exchange
+		case inter && bulk:
+			util.Fatal("Cannot have interfacial-induced DMI and bulk DMI at the same time")
+		}
+	case stencillevel==4:
+		switch {
+		case OpenBC:
+			util.Fatal("Cannot have OpenBC with higher order stencils.")
+		case !inter && !bulk:
+			Refer("Masell2025")
+			cuda.AddExchange_O4(dst, M.Buffer(), lex2.Gpu(), ms, regions.Gpu(), M.Mesh())
+		case inter && !bulk:
+			//Refer("Masell2025")
+			//cuda.AddDMI_O4(dst, M.Buffer(), lex2.Gpu(), din2.Gpu(), ms, regions.Gpu(), M.Mesh()) // dmi+exchange
+			util.Fatal("... programming cuda.AddDMI_O4 in progress ...")
+		case bulk && !inter:
+			Refer("Masell2025")
+			cuda.AddDMIBulk_O4(dst, M.Buffer(), lex2.Gpu(), dbulk2.Gpu(), ms, regions.Gpu(), M.Mesh()) // dmi+exchange
+		case inter && bulk:
+			util.Fatal("Cannot have interfacial-induced DMI and bulk DMI at the same time")
+		}
+	case stencillevel==2: // this is the bug-fix for version 3.11
+		switch {
+		case OpenBC:
+			util.Fatal("Cannot have OpenBC with higher order stencils.")
+		case !inter && !bulk:
+			//Refer("Masell2025")
+			//cuda.AddExchange_O2(dst, M.Buffer(), lex2.Gpu(), ms, regions.Gpu(), M.Mesh())
+			util.Fatal("... programming cuda.AddExchange_O2 in progress ...")
+		case inter && !bulk:
+			//Refer("Masell2025")
+			//cuda.AddDMI_O2(dst, M.Buffer(), lex2.Gpu(), din2.Gpu(), ms, regions.Gpu(), M.Mesh()) // dmi+exchange
+			util.Fatal("... programming cuda.AddDMI_O2 in progress ...")
+		case bulk && !inter:
+			Refer("Masell2025")
+			cuda.AddDMIBulk_O2(dst, M.Buffer(), lex2.Gpu(), dbulk2.Gpu(), ms, regions.Gpu(), M.Mesh()) // dmi+exchange
+			//util.Fatal("... programming cuda.AddDMIBulk_O2 in progress ...")
+		case inter && bulk:
+			util.Fatal("Cannot have interfacial-induced DMI and bulk DMI at the same time")
+		}
+	case stencillevel==0: // this is the old mumax3 version 3.11 for backward compatibility
+		switch {
+		case !inter && !bulk: 
+			cuda.AddExchange(dst, M.Buffer(), lex2.Gpu(), ms, regions.Gpu(), M.Mesh())
+		case inter && !bulk:
+			Refer("mulkers2017")
+			cuda.AddDMI(dst, M.Buffer(), lex2.Gpu(), din2.Gpu(), ms, regions.Gpu(), M.Mesh(), OpenBC) // dmi+exchange
+		case bulk && !inter:
+			cuda.AddDMIBulk(dst, M.Buffer(), lex2.Gpu(), dbulk2.Gpu(), ms, regions.Gpu(), M.Mesh(), OpenBC) // dmi+exchange
+			// TODO: add ScaleInterDbulk and InterDbulk
+		case inter && bulk:
+			util.Fatal("Cannot have interfacial-induced DMI and bulk DMI at the same time")
+		}
+	default:
+		util.Fatal("Invalid level for stencils in engine/exchange.go:AddExchangeField. Please send bug report.")
 	}
 }
 
